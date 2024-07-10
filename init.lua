@@ -1,6 +1,8 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+vim.opt.linebreak = true
+
 vim.opt.number = true
 vim.opt.relativenumber = true
 
@@ -102,6 +104,7 @@ require('lazy').setup({
       local gitsigns = require 'gitsigns'
       gitsigns.setup(opts)
       vim.keymap.set('n', '<leader>b', gitsigns.toggle_current_line_blame, { desc = 'Toggle current line blame' })
+      vim.keymap.set('n', '<leader>B', gitsigns.blame_line, { desc = 'Current line blame' })
     end,
   },
 
@@ -120,9 +123,6 @@ require('lazy').setup({
       {
         'nvim-telescope/telescope-fzf-native.nvim',
         build = 'make',
-        cond = function()
-          return vim.fn.executable 'make' == 1
-        end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
 
@@ -130,15 +130,23 @@ require('lazy').setup({
     },
     config = function()
       require('telescope').setup {
+        defaults = {
+          mappings = {
+            i = {
+              ['<C-f>'] = require('telescope.actions').to_fuzzy_refine,
+            },
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
           },
+          fzf = {},
         },
       }
 
-      pcall(require('telescope').load_extension, 'fzf')
-      pcall(require('telescope').load_extension, 'ui-select')
+      require('telescope').load_extension 'fzf'
+      require('telescope').load_extension 'ui-select'
 
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
