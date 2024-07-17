@@ -8,6 +8,8 @@ vim.opt.relativenumber = true
 
 vim.opt.mouse = 'a'
 
+vim.opt.tabstop = 2
+
 vim.opt.showmode = false
 
 vim.opt.breakindent = true
@@ -81,6 +83,8 @@ if not vim.loop.fs_stat(lazypath) then
   vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
+
+local home_folder = os.getenv 'HOME'
 
 -- [[ Configure and install plugins ]]
 require('lazy').setup({
@@ -237,7 +241,22 @@ require('lazy').setup({
       -- :help lspconfig-all
       local servers = {
         gopls = {},
-        tsserver = {},
+        tsserver = {
+          init_options = {
+            plugins = {
+              {
+                name = '@vue/typescript-plugin',
+                location = home_folder .. '/.bun/install/global/node_modules/@vue/typescript-plugin',
+                languages = { 'javascript', 'typescript', 'vue' },
+              },
+            },
+          },
+          filetypes = {
+            'javascript',
+            'typescript',
+            'vue',
+          },
+        },
         clojure_lsp = {},
         clangd = {},
         jsonls = {},
@@ -407,7 +426,8 @@ require('lazy').setup({
     lazy = false,
     priority = 1000,
     config = function()
-      vim.o.background = 'dark' -- or 'light'
+      -- vim.o.background = 'dark'
+      vim.o.background = 'light'
       vim.cmd.colorscheme 'NeoSolarized'
       vim.cmd.hi 'Comment gui=none'
     end,
@@ -475,7 +495,15 @@ require('lazy').setup({
     'nvim-lualine/lualine.nvim',
     dependencies = { 'nvim-tree/nvim-web-devicons' },
     opts = {
-      theme = 'solarized_dark',
+      theme = 'solarized_light',
+      sections = {
+        lualine_a = { 'mode' },
+        lualine_b = { 'branch', 'diff', 'diagnostics' },
+        lualine_c = { { 'filename', path = 1 } },
+        lualine_x = { 'encoding', 'fileformat', 'filetype' },
+        lualine_y = { 'progress' },
+        lualine_z = { 'location' },
+      },
     },
   },
 
@@ -630,6 +658,8 @@ require('lazy').setup({
       { '<Leader>l', '<Cmd>MultipleCursorsLock<CR>', mode = { 'n', 'x' }, desc = 'Lock virtual cursors' },
     },
   },
+
+  { 'wakatime/vim-wakatime', lazy = false },
 }, {
   ui = {},
 })
